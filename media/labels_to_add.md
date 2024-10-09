@@ -1,18 +1,7 @@
-ClassId,Name
 0,Speed limit (20km/h)
-1,Speed limit (30km/h)
-2,Speed limit (50km/h)
 3,Speed limit (60km/h)
-4,Speed limit (70km/h)
-5,Speed limit (80km/h)
 6,End of speed limit (80km/h)
-7,Speed limit (100km/h)
-8,Speed limit (120km/h)
-9,No passing
-10,No passing for vechiles over 3.5 metric tons
 11,Right-of-way at the next intersection
-12,Priority road
-13,Yield
 14,Stop
 15,No vechiles
 16,Vechiles over 3.5 metric tons prohibited
@@ -23,8 +12,7 @@ ClassId,Name
 21,Double curve
 22,Bumpy road
 23,Slippery road
-24,Road narrows
-25,Road work
+24,Road narrows on the right
 26,Traffic signals
 27,Pedestrians
 28,Children crossing
@@ -34,10 +22,8 @@ ClassId,Name
 32,End of all speed and passing limits
 33,Turn right ahead
 34,Turn left ahead
-35,Ahead only
 36,Go straight or right
 37,Go straight or left
-38,Keep right
 39,Keep left
 40,Roundabout mandatory
 41,End of no passing
