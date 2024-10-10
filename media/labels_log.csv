@@ -1,0 +1,44 @@
+ClassId,Name,Detection
+0,Speed limit (20km/h),ok
+1,Speed limit (30km/h),ok
+2,Speed limit (50km/h),ok
+3,Speed limit (60km/h),nope
+4,Speed limit (70km/h),ok
+5,Speed limit (80km/h),ok
+~~6,End of speed limit (80km/h),TO DELETE~~
+7,Speed limit (100km/h),ok
+8,Speed limit (120km/h),ok
+9,No passing,ok
+~~10,No passing for vehiles over 3.5 metric tons,TO DELETE~~
+11,Right-of-way at the next intersection,ok
+12,Priority road,ok
+13,Yield,ok
+14,Stop,ok
+15,No vehiles,ok
+16,Vechiles over 3.5 metric tons prohibited,ok
+17,No entry,ok
+18,General caution,ok
+19,Dangerous curve to the left,ok
+20,Dangerous curve to the right,ok
+21,Double curve,ok
+22,Bumpy road,ok
+23,Slippery road,ok
+24,Road narrows,ok
+25,Road work,ok
+~~26,Traffic signals,TO DELETE~~
+27,Pedestrians,nope
+28,Children crossing,flip augmentation
+29,Bicycles crossing,nope
+30,Beware of ice/snow,ok
+31,Wild animals crossing,ok
+32,End of all speed and passing limits,ok
+33,Turn right ahead,ok
+34,Turn left ahead,ok
+35,Ahead only,ok
+36,Go straight or right,ok
+37,Go straight or left,ok
+38,Keep right,ok
+39,Keep left,ok
+40,Roundabout mandatory,ok
+~~41,End of no passing,TO DELETE~~
+~~42,End of no passing by vechiles over 3.5 metric tons,TO DELETE~~
