@@ -26,9 +26,9 @@ ClassId,Name,Detection
 24,Road narrows,ok
 25,Road work,ok
 ~~26,Traffic signals,TO DELETE~~
-27,Pedestrians,nope
-28,Children crossing,flip augmentation
-29,Bicycles crossing,nope
+27,Pedestrians,ok
+28,Children crossing,ok
+29,Bicycles crossing,ok
 30,Beware of ice/snow,ok
 31,Wild animals crossing,ok
 32,End of all speed and passing limits,ok
