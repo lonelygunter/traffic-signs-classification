@@ -7,12 +7,12 @@ The dataset consists of 43 classes of traffic signs, with a total of 34889 image
 ## Table of Contents
 
 - [Traffic Signs Classification](#traffic-signs-classification)
-  - [Table of Contents](#table-of-contents)
-  - [Project Setup](#project-setup)
-  - [Data Exploration](#data-exploration)
-  - [Data Preprocessing](#data-preprocessing)
-  - [Model Architecture](#model-architecture)
-  - [Conclusion](#conclusion)
+	- [Table of Contents](#table-of-contents)
+	- [Project Setup](#project-setup)
+	- [Data Exploration](#data-exploration)
+	- [Data Preprocessing](#data-preprocessing)
+	- [Model Architecture](#model-architecture)
+	- [Conclusion](#conclusion)
 
 ## Project Setup
 
@@ -34,6 +34,25 @@ The dataset consists of 43 classes of traffic signs, with a total of 34889 image
 Here is a sample of the images in the dataset:
 
 ![Traffic Signs 20km](./media/img/traffic_signs_20km.png) ![Traffic Signs 120km](./media/img/traffic_signs_120km.png) ![Traffic Signs nopassing](./media/img/traffic_signs_nopassing.png) ![Traffic Signs right](./media/img/traffic_signs_right.png)
+
+The dataset structure is as follows:
+```
+train/
+	class_0/
+		img1.jpg
+		...
+	...
+val/
+	class_0/
+		img1.jpg
+		...
+	...
+test/
+	class_0/
+		img1.jpg
+		...
+	...
+```
 
 ## Data Preprocessing
 
