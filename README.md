@@ -16,16 +16,7 @@ The dataset consists of 43 classes of traffic signs, with a total of 34889 image
 
 ## Project Setup
 
-To run this project, you need to have the following libraries installed:
-
-``` bash
-pip install numpy
-pip install pandas
-pip install matplotlib
-pip install tensorflow
-pip install scikit-learn
-pip install opencv-python
-```
+To run this project, you need to have [this](./requirements.txt) requirements installed. Pay attention! If the `torch` library gives some errors, I suggest to install the `2.5.0` version.
 
 ## Data Exploration
 
