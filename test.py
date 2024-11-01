@@ -70,24 +70,26 @@ def getCalssName(classNo):
 	elif classNo == 36: return 'Keep left'
 	elif classNo == 37: return 'Roundabout mandatory'
 
-
-
 ### Main
 def main():
+	# take path from command line argument
+	if len(sys.argv) < 2:
+		print("syntax: python test.py <trained_model_path>")
+		sys.exit(1)
+
 	# Initialize video capture from the default camera (index 0)
 	video_cap = cv2.VideoCapture(0)
 	video_cap.set(3, FRAME_WIDTH) # Set the width of the frame
 	video_cap.set(4, FRAME_HEIGHT) # Set the height of the frame
 	video_cap.set(10, BRIGHTNESS) # Set the brightness of the frame
 
-	# take path from command line argument
-	trained_model_path = sys.argv[1]
-	while not trained_model_path:
-		trained_model_path = input("Enter the path to the trained model: ")
+	# # Load the model
+	import dill
+	with open(sys.argv[1], "rb") as pickle_in:
+		model = dill.load(pickle_in)
+	# pickle_in = open(sys.argv[1], "rb")
+	# model = pickle.load(pickle_in)
 
-	# Load the trained model using pickle
-	pickle_in = open(trained_model_path, "rb")
-	model = pickle.load(pickle_in)
 	last_class = "" # Store the last class index
 
 	while True:
@@ -110,11 +112,13 @@ def main():
 		cv2.putText(flipped_frame, "CLASS: ", (20, 35), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.putText(flipped_frame, "PROBABILITY: ", (20, 75), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.putText(flipped_frame, "LAST: ", (20, 115), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+		cv2.putText(flipped_frame, "PROB: ", (20, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 
 		# Make predictions using the model
-		predictions = model.predict(img)
+		predictions = model.get_model().predict(img)
 		class_id = np.argmax(predictions, axis=1) # Get the index of the class with the highest probability
 		probability_value = np.amax(predictions) # Get the maximum probability value
+		cv2.putText(flipped_frame, str(round(probability_value * 100, 2)) + "%", (180, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 
 		# Check if the probability exceeds the defined threshold
 		if probability_value > THRESHOLD:
