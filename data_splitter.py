@@ -1,13 +1,11 @@
 import os
 import re
 import shutil
+import sys
 
 # Define the path to the train data directory
-TRAIN_DATA_DIR = './dataset_no0_0.2/train_data'
-VAL_DATA_DIR = './dataset_no0_0.2/val_data'
-TEST_DATA_DIR = './dataset_no0_0.2/test_data'
-VAL_PROP = 0.2
-TEST_PROP = 0.2
+VAL_PROP = 0.1
+TEST_PROP = 0.1
 
 def extract_number(filename):
     """ Extracts the last number from a filename """
@@ -15,14 +13,19 @@ def extract_number(filename):
     match = re.search(r'_(\d+)(?=\.\w+)', filename)
     return int(match.group(1)) if match else float('inf')  # Return inf if no match found
 
+# setup paths
+train_path = sys.argv[1] + "/train_data"
+val_path = sys.argv[1] + "/val_data"
+test_path = sys.argv[1] + "test_data"
+
 # Loop through each class folder in the train directory
-for class_dir in os.listdir(TRAIN_DATA_DIR):
-    class_path = os.path.join(TRAIN_DATA_DIR, class_dir)
+for class_dir in os.listdir(train_path):
+    class_path = os.path.join(train_path, class_dir)
     
     if os.path.isdir(class_path):
         # Create class-specific directories in val_data and test_data
-        val_class_dir = os.path.join(VAL_DATA_DIR, class_dir)
-        test_class_dir = os.path.join(TEST_DATA_DIR, class_dir)
+        val_class_dir = os.path.join(val_path, class_dir)
+        test_class_dir = os.path.join(test_path, class_dir)
         
         os.makedirs(val_class_dir, exist_ok=True)
         os.makedirs(test_class_dir, exist_ok=True)
