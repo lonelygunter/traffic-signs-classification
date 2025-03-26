@@ -14,9 +14,10 @@ def extract_number(filename):
     return int(match.group(1)) if match else float('inf')  # Return inf if no match found
 
 # setup paths
-train_path = sys.argv[1] + "/train_data"
-val_path = sys.argv[1] + "/val_data"
-test_path = sys.argv[1] + "test_data"
+root = sys.argv[1]
+train_path = root + "/train_data"
+val_path = root + "/val_data"
+test_path = root + "/test_data"
 
 # Loop through each class folder in the train directory
 for class_dir in os.listdir(train_path):

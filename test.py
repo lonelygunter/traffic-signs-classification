@@ -2,24 +2,45 @@ import numpy as np
 import cv2
 import pickle
 import sys
+import torch
+import pandas
+import time
 
 ### Constants
 FRAME_WIDTH = 640 # Set width of the video frame
 FRAME_HEIGHT = 480 # Set height of the video frame
 BRIGHTNESS = 180 # Set brightness level
-THRESHOLD = 0.90 # Set probability threshold for predictions
+THRESHOLD = 0.95 # Set probability threshold for predictions
 IMG_DIM_RES = (32, 32) # resize to 32x32 pixels
 FONT = cv2.FONT_HERSHEY_SIMPLEX # Set the font for displaying text
 
 ### Functions
 def grayscale(img):
-	"""Convert the input image to grayscale."""
-	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	return img
+	import torchvision.transforms as transforms
+	from torchvision.transforms import functional
+	"""function to convert the image to grayscale"""
+	if img is None or not isinstance(img, np.ndarray) or len(img.shape) == 2:  # Assuming 'grayscale' starts here
+		return img  # return it as is
+	else:
+		img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # convert to grayscale
+		return img
 
 def equalize(img):
-	"""Apply histogram equalization to the input image to enhance contrast."""
-	img = cv2.equalizeHist(img)
+	"""Function to equalize the histogram for contrast adjustment."""
+	if img is None:
+		return img  # Return None as is
+
+	# Check if img is a tensor and convert to np array
+	if isinstance(img, torch.Tensor):
+		img = img.detach().cpu().np()  # Convert to np array
+
+	if not isinstance(img, np.ndarray):
+		print("Received non-array image: ", type(img))
+		return img
+
+	img = img.astype(np.uint8)  # Ensure the image is 8-bit grayscale
+	img = cv2.equalizeHist(img)  # Apply histogram equalization
+
 	return img
 
 def preprocessing(img):
@@ -29,53 +50,22 @@ def preprocessing(img):
 	img = img / 255 # normalize pixel values to the range [0, 1] instead of [0, 255]
 	return img
 
-def getCalssName(classNo):
-	"""Return the name of the traffic sign based on the class index"""
-	if classNo == 0: return 'Speed Limit 20 km/h'
-	elif classNo == 1: return 'Speed Limit 30 km/h'
-	elif classNo == 2: return 'Speed Limit 50 km/h'
-	elif classNo == 3: return 'Speed Limit 60 km/h'
-	elif classNo == 4: return 'Speed Limit 70 km/h'
-	elif classNo == 5: return 'Speed Limit 80 km/h'
-	elif classNo == 6: return 'Speed Limit 100 km/h'
-	elif classNo == 7: return 'Speed Limit 120 km/h'
-	elif classNo == 8: return 'No passing'
-	elif classNo == 9: return 'Right-of-way at the next intersection'
-	elif classNo == 10: return 'Priority road'
-	elif classNo == 11: return 'Yield'
-	elif classNo == 12: return 'Stop'
-	elif classNo == 13: return 'No vehicles'
-	elif classNo == 14: return 'Vehicles over 3.5 metric tons prohibited'
-	elif classNo == 15: return 'No entry'
-	elif classNo == 16: return 'General caution'
-	elif classNo == 17: return 'Dangerous curve to the left'
-	elif classNo == 18: return 'Dangerous curve to the right'
-	elif classNo == 19: return 'Double curve'
-	elif classNo == 20: return 'Bumpy road'
-	elif classNo == 21: return 'Slippery road'
-	elif classNo == 22: return 'Road narrows on the right'
-	elif classNo == 23: return 'Road work'
-	elif classNo == 24: return 'Pedestrians'
-	elif classNo == 25: return 'Children crossing'
-	elif classNo == 26: return 'Bicycles crossing'
-	elif classNo == 27: return 'Beware of ice/snow'
-	elif classNo == 28: return 'Wild animals crossing'
-	elif classNo == 29: return 'End of all speed and passing limits'
-	elif classNo == 30: return 'Turn right ahead'
-	elif classNo == 31: return 'Turn left ahead'
-	elif classNo == 32: return 'Ahead only'
-	elif classNo == 33: return 'Go straight or right'
-	elif classNo == 34: return 'Go straight or left'
-	elif classNo == 35: return 'Keep right'
-	elif classNo == 36: return 'Keep left'
-	elif classNo == 37: return 'Roundabout mandatory'
 
 ### Main
 def main():
 	# take path from command line argument
-	if len(sys.argv) < 2:
-		print("syntax: python test.py <trained_model_path>")
+	if len(sys.argv) < 3:
+		print(f"syntax: python3 {sys.argv[0]} <trained_model_path> <labels_path>")
 		sys.exit(1)
+
+	# create log file
+	logfile = open("traffic_sign.log", "a")
+
+	# load labels
+	model_path = sys.argv[1]
+
+	# load labels
+	labels = pandas.read_csv(sys.argv[2])
 
 	# Initialize video capture from the default camera (index 0)
 	video_cap = cv2.VideoCapture(0)
@@ -83,12 +73,9 @@ def main():
 	video_cap.set(4, FRAME_HEIGHT) # Set the height of the frame
 	video_cap.set(10, BRIGHTNESS) # Set the brightness of the frame
 
-	# # Load the model
-	import dill
-	with open(sys.argv[1], "rb") as pickle_in:
-		model = dill.load(pickle_in)
-	# pickle_in = open(sys.argv[1], "rb")
-	# model = pickle.load(pickle_in)
+	# Load the model
+	pickle_in = open(model_path, "rb")
+	model = pickle.load(pickle_in)
 
 	last_class = "" # Store the last class index
 
@@ -96,44 +83,48 @@ def main():
 		# Capture a frame from the camera
 		success, original_frame = video_cap.read()
 		flipped_frame = cv2.flip(original_frame, 1)
-		
-		# Convert the captured frame to a numpy array and resize it
+
+		# Convert the captured frame to a np array and resize it
 		img = np.asarray(original_frame)
 		img = cv2.resize(img, IMG_DIM_RES) # Resize to 32x32 pixels
 
 		# Preprocess the image
 		img = preprocessing(img)
 		cv2.imshow("Processed Image", img) # Show the processed image
-		
+
 		# Reshape the image to match the input shape of the model
 		img = img.reshape(1, 32, 32, 1)
-		
+
 		# Display placeholder text for classification and probability on the original image
-		cv2.putText(flipped_frame, "CLASS: ", (20, 35), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-		cv2.putText(flipped_frame, "PROBABILITY: ", (20, 75), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+		# cv2.putText(flipped_frame, "CLASS: ", (20, 35), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+		# cv2.putText(flipped_frame, "PROBABILITY: ", (20, 75), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 		cv2.putText(flipped_frame, "LAST: ", (20, 115), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-		cv2.putText(flipped_frame, "PROB: ", (20, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+		# cv2.putText(flipped_frame, "PROB: ", (20, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 
 		# Make predictions using the model
-		predictions = model.get_model().predict(img)
+		predictions = np.array(model.predict(img))
+		# normalize it
+		predictions = predictions / np.linalg.norm(predictions)
+		# class_id = model.predict_classes(img)
 		class_id = np.argmax(predictions, axis=1) # Get the index of the class with the highest probability
-		probability_value = np.amax(predictions) # Get the maximum probability value
-		cv2.putText(flipped_frame, str(round(probability_value * 100, 2)) + "%", (180, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+		probability_value = np.amax(predictions) - 0.015 # Get the maximum probability value
+		# cv2.putText(flipped_frame, str(probability_value) + "%", (120, 155), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 
 		# Check if the probability exceeds the defined threshold
 		if probability_value > THRESHOLD:
-			class_name = getCalssName(class_id)
-			print(class_name) # Print the class name based on the index
+			class_name = labels.loc[labels['ClassId'] == int(class_id), 'Name'].values[0]
 			# Display the class name and probability on the original image
-			cv2.putText(flipped_frame, str(class_id) + " " + str(class_name), (120, 35), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
-			cv2.putText(flipped_frame, str(round(probability_value * 100, 2)) + "%", (180, 75), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+			# cv2.putText(flipped_frame, str(class_id) + " " + str(class_name), (120, 35), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+			# cv2.putText(flipped_frame, str(round(probability_value * 100, 2)) + "%", (180, 75), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 			last_class = str(class_id) + " " + str(class_name)
+			logfile.write(f"{str(class_id)} {str(class_name)} w prob {probability_value}\n")
 
-		cv2.putText(flipped_frame, str(last_class), (100, 115), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
+
+		cv2.putText(flipped_frame, str(last_class), (120, 115), FONT, 0.75, (0, 0, 255), 2, cv2.LINE_AA)
 		
 		# Show the result image with the class and probability
 		cv2.imshow("Result", flipped_frame)
-		
+
 		# Exit the loop when 'q' is pressed
 		if cv2.waitKey(1) and 0xFF == ord('q'):
 			break
@@ -141,6 +132,9 @@ def main():
 	# Release the camera and close all OpenCV windows
 	video_cap.release()
 	cv2.destroyAllWindows()
+
+	# close log file
+	logfile.close()
 
 if __name__ == "__main__":
 	main()
